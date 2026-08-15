@@ -1,0 +1,43 @@
+name: SATATYA_CIBR20MVL12CWP_P2
+
+sensor:
+  format: "1/2.8 inch"
+  name : imx662
+  pixel_size: 2.9
+
+  active_area:
+    width: 5.57
+    height: 3.13
+
+  active_pixel:
+    width: 1936
+    height: 1100
+
+  resolution:
+    width: 1920
+    height: 1080
+
+
+lens:
+  type: motorized_varifocal
+  min_focal_length_mm: 2.8
+  max_focal_length_mm: 12.0
+
+fov:
+  wide:
+    focal_length_mm: 2.8
+    horizontal_deg: 98.0
+    vertical_deg: 51.0
+
+  tele:
+    focal_length_mm: 12.0
+    horizontal_deg: 33.0
+    vertical_deg: 19.0
+
+fps:
+  min: 1
+  max: 30
+
+shutter:
+  min_seconds: 0.00001
+  max_seconds: 0.0666667
