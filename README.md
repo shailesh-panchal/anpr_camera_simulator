@@ -32,3 +32,41 @@ anpr-camera-simulator/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+
+                  Camera
+                    │
+            CameraPose
+          ┌─────────┴─────────┐
+          │                   │
+       Height               Pitch
+          │                   │
+          └─────────┬─────────┘
+                    │
+                    ▼
+                  Road
+                    │
+                    ▼
+              Vehicle
+          ┌─────────┴─────────┐
+          │                   │
+      Dimensions          Trajectory
+          │                   │
+          └─────────┬─────────┘
+                    │
+                    ▼
+             VehicleState
+                    │
+                    ▼
+              WorldPoint
+                    │
+                    ▼
+           World → Camera
+                    │
+                    ▼
+                Point3D
+                    │
+                    ▼
+             Projection
+                    │
+                    ▼
+                Point2D

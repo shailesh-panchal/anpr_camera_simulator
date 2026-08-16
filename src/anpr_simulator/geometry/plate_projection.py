@@ -1,14 +1,27 @@
 from dataclasses import dataclass
 
-from anpr_simulator.geometry.projection import(
-    Point2D,
-    Point3D,
-    project_point,
-)
 from anpr_simulator.geometry.camera_intrinsics import CameraIntrinsics
 from anpr_simulator.geometry.license_plate import (
     LicensePlateDimensions,
     license_plate_corners,
+)
+from anpr_simulator.geometry.projection import (
+    Point2D,
+    project_point,
+)
+from anpr_simulator.geometry.camera_pose import (
+    CameraPose,
+)
+from anpr_simulator.geometry.transform import (
+    world_to_camera,
+)
+
+from anpr_simulator.geometry.vehicle_state import (
+    VehicleState,
+)
+
+from anpr_simulator.geometry.world import (
+    WorldPoint,
 )
 
 @dataclass(frozen=True)
@@ -52,4 +65,47 @@ def project_plate(
         top_right=projected_corners[1],
         bottom_left=projected_corners[2],
         bottom_right=projected_corners[3],
+    )
+
+def project_vehicle_plate(
+    vehicle_state: VehicleState,
+    plate_dimensions: LicensePlateDimensions,
+    camera_pose: CameraPose,
+    intrinsics: CameraIntrinsics,
+) -> ProjectedPlate:
+
+    corners = license_plate_corners(
+        center_x_m=vehicle_state.x_m,
+        center_y_m=vehicle_state.y_m,
+        distance_z_m=vehicle_state.z_m,
+        dimensions=plate_dimensions,
+    )
+
+    image_points = []
+
+    for corner in corners:
+
+        world_point = WorldPoint(
+            x_m=corner.x,
+            y_m=corner.y,
+            z_m=corner.z,
+        )
+
+        camera_point = world_to_camera(
+            world_point,
+            camera_pose,
+        )
+
+        image_point = project_point(
+            camera_point,
+            intrinsics,
+        )
+
+        image_points.append(image_point)
+
+    return ProjectedPlate(
+        top_left=image_points[0],
+        top_right=image_points[1],
+        bottom_left=image_points[2],
+        bottom_right=image_points[3],
     )

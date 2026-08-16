@@ -11,6 +11,14 @@ from anpr_simulator.geometry.license_plate import (
 from anpr_simulator.geometry.plate_projection import (
     ProjectedPlate,
     project_plate,
+    project_vehicle_plate
+)
+from anpr_simulator.geometry.camera_pose import (
+    CameraPose,
+)
+
+from anpr_simulator.geometry.vehicle_state import (
+    VehicleState,
 )
 
 
@@ -86,3 +94,40 @@ def test_plate_size_decreases_with_distance():
 
     assert near_plate.width_pixels > far_plate.width_pixels
     assert near_plate.height_pixels > far_plate.height_pixels
+
+def test_project_vehicle_plate_with_camera_height():
+
+    intrinsics = CameraIntrinsics(
+        fx=973.4,
+        fy=983.4,
+        cx=968.0,
+        cy=550.0,
+    )
+
+    camera = CameraPose(
+        x_m=0.0,
+        y_m=5.0,
+        z_m=0.0,
+        pitch_deg=10.0,
+    )
+
+    vehicle_state = VehicleState(
+        x_m=0.0,
+        y_m=0.5,
+        z_m=50.0,
+    )
+
+    plate = LicensePlateDimensions(
+        width_m=0.52,
+        height_m=0.11,
+    )
+
+    result = project_vehicle_plate(
+        vehicle_state=vehicle_state,
+        plate_dimensions=plate,
+        camera_pose=camera,
+        intrinsics=intrinsics,
+    )
+
+    assert result.width_pixels > 0
+    assert result.height_pixels > 0

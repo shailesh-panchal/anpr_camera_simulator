@@ -40,11 +40,14 @@ def focal_length_pixels(
         raise ValueError(
             "Active sensor width must be greater than 0"
         )
-
+    '''focal length (pixels) = focal_length_mm / pixel_size_mm
+    pixel_size_mm = active_area_mm / active_pixels.
+    final equation is focal_length_mm * (active_pixels / active_area_mm)
+    '''
     return (
         focal_length_mm
-        * active_pixels
-        / active_area_mm
+        * (active_pixels
+        / active_area_mm)
     )
 
 def horizontal_fov_deg(
