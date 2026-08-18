@@ -23,14 +23,14 @@ def world_to_camera(
     # Rotation around X axis
     x_camera = dx
 
-    y_camera = (
-        cos_pitch * dy
-        - sin_pitch * dz
+    z_camera = (
+        cos_pitch * dz
+        -sin_pitch * dy
     )
 
-    z_camera = (
-        sin_pitch * dy
-        + cos_pitch * dz
+    y_camera = (
+        -sin_pitch * dz
+        -cos_pitch * dy
     )
 
     return Point3D(
