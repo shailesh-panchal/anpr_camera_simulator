@@ -70,3 +70,39 @@ anpr-camera-simulator/
                     │
                     ▼
                 Point2D
+
+
+M1 ── Empty 4K scene
+ │
+ ▼
+M2 ── Moving rectangle vehicle
+ │
+ ▼
+M3 ── License plate rectangle
+ │
+ ▼
+M4 ── Plate follows vehicle
+ │
+ ▼
+M5 ── Plate scaling
+ │
+ ▼
+M6 ── Plate perspective
+ │
+ ▼
+M7 ── Real vehicle image
+ │
+ ▼
+M8 ── Vehicle perspective
+ │
+ ▼
+M9 ── Complete frame sequence
+ │
+ ▼
+M10 ─ Video generation
+ │
+ ▼
+M11 ─ Motion blur
+ │
+ ▼
+M12 ─ Sensor effects

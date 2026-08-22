@@ -1,5 +1,7 @@
 from collections.abc import Iterator
 
+from iniconfig import exceptions
+
 from anpr_simulator.geometry.camera_intrinsics import (
     CameraIntrinsics,
 )
@@ -51,19 +53,23 @@ class FrameGenerator:
         time_s = 0.0
 
         while time_s < self.scenario.duration_s:
+            try:
+                frame = simulate_frame(
+                    trajectory=self.scenario.trajectory,
+                    vehicle_dimensions=self.scenario.vehicle_dimensions,
+                    plate_dimensions=self.scenario.plate_dimensions,
+                    camera_pose=self.scenario.camera_pose,
+                    intrinsics=self.scenario.intrinsics,
+                    frame_number=frame_number,
+                    time_s=time_s,
+                )
+                yield frame
 
-            frame = simulate_frame(
-                trajectory=self.scenario.trajectory,
-                vehicle_dimensions=self.scenario.vehicle_dimensions,
-                plate_dimensions=self.scenario.plate_dimensions,
-                camera_pose=self.scenario.camera_pose,
-                intrinsics=self.scenario.intrinsics,
-                frame_number=frame_number,
-                time_s=time_s,
-            )
+            except ValueError as error:
+                print(f"Skipping frame {frame_number} at {time_s:.2f}s | ValueError: {error}")
+                break
 
-            yield frame
-
-            frame_number += 1
-            time_s = frame_number * frame_interval_s
+            finally:
+                frame_number += 1
+                time_s = frame_number * frame_interval_s
 
