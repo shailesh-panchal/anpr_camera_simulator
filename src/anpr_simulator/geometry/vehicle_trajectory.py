@@ -47,7 +47,7 @@ class VehicleTrajectory:
             z_m = (
                 self.initial_z_m - distance_travelled_m
             )
-            if z_m < 0:
+            if z_m <= 0:
                 raise ValueError(
                     "Vehicle has passed the camera"
                 )

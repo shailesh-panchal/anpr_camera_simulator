@@ -11,11 +11,18 @@ from anpr_simulator.geometry.camera_pose import (
 from anpr_simulator.geometry.license_plate import (
     LicensePlateDimensions,
 )
+from anpr_simulator.geometry.transform import (
+    world_to_camera,
+)
 from anpr_simulator.geometry.vehicle import (
     VehicleDimensions,
 )
 from anpr_simulator.geometry.vehicle_trajectory import (
+    VehicleDirection,
     VehicleTrajectory,
+)
+from anpr_simulator.geometry.world import (
+    WorldPoint,
 )
 from anpr_simulator.renderer.opencv_renderer.license_plate_render import (
     create_license_plate,
@@ -29,6 +36,7 @@ from anpr_simulator.renderer.opencv_renderer.renderer import (
 )
 from anpr_simulator.renderer.opencv_renderer.vehicle_render import (
     render_vehicle,
+    render_vehicle_from_state,
 )
 from anpr_simulator.simulation.frame_simulator import (
     simulate_frame,
@@ -64,13 +72,18 @@ class FrameGenerator:
             self.scenario = scenario
             return
 
-        if fps is None or duration_s is None:
-            raise ValueError("fps and duration_s are required when scenario is not provided.")
+        if fps is None:
+            raise ValueError("fps is required when scenario is not provided.")
 
         if trajectory is None or vehicle_dimensions is None or plate_dimensions is None:
             raise ValueError(
                 "trajectory, vehicle_dimensions, and plate_dimensions are required when scenario is not provided."
             )
+
+        if duration_s is None:
+            duration_s = trajectory.initial_z_m / max(trajectory.speed_mps, 1e-9)
+            if duration_s <= 0:
+                raise ValueError("Duration must be greater than zero.")
 
         if camera_pose is None or intrinsics is None:
             raise ValueError("camera_pose and intrinsics are required when scenario is not provided.")
@@ -86,10 +99,33 @@ class FrameGenerator:
             trajectory=trajectory,
         )
 
+    def _vehicle_front_panel_visible(self, vehicle_state: object) -> bool:
+        half_length = self.scenario.vehicle_dimensions.length_m / 2.0
+        half_width = self.scenario.vehicle_dimensions.width_m / 2.0
+        total_height = self.scenario.vehicle_dimensions.height_m
+
+        corners = [
+            WorldPoint(x_m=vehicle_state.x_m - half_width, y_m=0.0, z_m=vehicle_state.z_m - half_length),
+            WorldPoint(x_m=vehicle_state.x_m + half_width, y_m=0.0, z_m=vehicle_state.z_m - half_length),
+            WorldPoint(x_m=vehicle_state.x_m + half_width, y_m=0.0, z_m=vehicle_state.z_m + half_length),
+            WorldPoint(x_m=vehicle_state.x_m - half_width, y_m=0.0, z_m=vehicle_state.z_m + half_length),
+            WorldPoint(x_m=vehicle_state.x_m - half_width, y_m=total_height, z_m=vehicle_state.z_m - half_length),
+            WorldPoint(x_m=vehicle_state.x_m + half_width, y_m=total_height, z_m=vehicle_state.z_m - half_length),
+            WorldPoint(x_m=vehicle_state.x_m + half_width, y_m=total_height, z_m=vehicle_state.z_m + half_length),
+            WorldPoint(x_m=vehicle_state.x_m - half_width, y_m=total_height, z_m=vehicle_state.z_m + half_length),
+        ]
+
+        for point in corners:
+            camera_point = world_to_camera(point, self.scenario.camera_pose)
+            if camera_point.z <= 0:
+                return False
+        return True
+
     def generate(self) -> Iterator[SimulationFrame]:
         """
-        Generate simulation frames from t=0
-        until the requested duration.
+        Generate simulation frames from t=0 until the vehicle is no longer visible
+        inside the camera field of view. If the vehicle crosses the camera plane,
+        stop without forcing a user-provided duration.
         """
 
         frame_interval_s = 1.0 / self.scenario.fps
@@ -108,6 +144,8 @@ class FrameGenerator:
                     frame_number=frame_number,
                     time_s=time_s,
                 )
+                if not self._vehicle_front_panel_visible(frame.vehicle_state):
+                    break
                 yield frame
 
             except ValueError as error:
@@ -132,6 +170,7 @@ class FrameGenerator:
         plate_text_color: tuple[int, int, int] = (0, 0, 0),
         include_background: bool = True,
         include_vehicle: bool = True,
+        front_panel_image_path: str | None = None,
     ) -> np.ndarray:
         """
         Composite a real OpenCV scene from a simulated geometry frame.
@@ -152,14 +191,14 @@ class FrameGenerator:
             rendered[:] = background_color
 
         if include_vehicle:
-            if vehicle_position is None:
-                vehicle_position = (max(0, int(width * 0.10)), max(0, int(height * 0.60)))
-
-            rendered = render_vehicle(
+            rendered = render_vehicle_from_state(
                 frame=rendered,
-                vehicle_position=vehicle_position,
-                vehicle_size=vehicle_size,
+                vehicle_state=frame_data.vehicle_state,
+                vehicle_dimensions=self.scenario.vehicle_dimensions,
+                camera_pose=self.scenario.camera_pose,
+                intrinsics=self.scenario.intrinsics,
                 vehicle_color=vehicle_color,
+                panel_image_path=front_panel_image_path,
             )
 
         plate = create_license_plate(
@@ -190,6 +229,7 @@ class FrameGenerator:
         plate_text_color: tuple[int, int, int] = (0, 0, 0),
         include_background: bool = True,
         include_vehicle: bool = True,
+        front_panel_image_path: str | None = None,
     ) -> Iterator[np.ndarray]:
         """
         Yield real OpenCV frames for every simulated geometry frame.
@@ -208,5 +248,6 @@ class FrameGenerator:
                 plate_text_color=plate_text_color,
                 include_background=include_background,
                 include_vehicle=include_vehicle,
+                front_panel_image_path=front_panel_image_path,
             )
 

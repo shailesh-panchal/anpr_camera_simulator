@@ -221,6 +221,58 @@ def test_vehicle_moves_between_frames():
         98.0
     )
 
+
+def test_build_generator_uses_full_visible_approach_without_duration_flag():
+    from generate_anpr_sequence import build_generator
+
+    args = type(
+        "Args",
+        (),
+        {
+            "camera_config": "config/cameras/satatya_cibr20mvl12cwp_p2.yaml",
+            "fov_mode": "wide",
+            "focal_length_mm": None,
+            "frame_width": 1920,
+            "frame_height": 1080,
+            "fps": 60.0,
+            "shutter_speed_s": None,
+            "camera_height_m": 2.0,
+            "camera_pitch_deg": 10.0,
+            "vehicle_length_m": 4.2,
+            "vehicle_width_m": 1.8,
+            "vehicle_height_m": 1.6,
+            "plate_mount_height_m": 0.5,
+            "plate_width_m": 0.52,
+            "plate_height_m": 0.11,
+            "speed_mps": 2.5,
+            "initial_distance_m": 10.0,
+            "direction": "approaching",
+            "fx": None,
+            "fy": None,
+            "cx": None,
+            "cy": None,
+            "vehicle_render_width_px": 260,
+            "vehicle_render_height_px": 110,
+            "front_panel_image": None,
+            "plate_number": "KA01AB1234",
+            "background_color": (30, 30, 30),
+            "vehicle_color": (80, 80, 80),
+            "plate_background_color": (255, 255, 255),
+            "plate_text_color": (0, 0, 0),
+            "include_background": False,
+            "include_vehicle": True,
+            "plate_only": False,
+            "output": "output/test.mp4",
+            "save_frames": None,
+            "frame_format": "png",
+        },
+    )()
+
+    generator = build_generator(args)
+
+    assert generator.scenario.duration_s == pytest.approx(10.0 / 2.5)
+    assert generator.scenario.trajectory.initial_z_m == pytest.approx(10.0)
+
 @pytest.mark.parametrize(
     "fps",
     [

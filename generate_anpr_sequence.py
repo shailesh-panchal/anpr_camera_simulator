@@ -125,9 +125,10 @@ def build_generator(args: argparse.Namespace) -> FrameGenerator:
         direction=direction,
     )
 
+    duration_s = args.initial_distance_m / max(args.speed_mps, 1e-9)
     return FrameGenerator(
         fps=args.fps,
-        duration_s=args.duration_s,
+        duration_s=duration_s,
         trajectory=trajectory,
         vehicle_dimensions=vehicle_dimensions,
         plate_dimensions=plate_dimensions,
@@ -155,6 +156,7 @@ def save_frames(args: argparse.Namespace, generator: FrameGenerator, width: int,
             plate_text_color=args.plate_text_color,
             include_background=include_background,
             include_vehicle=include_vehicle,
+            front_panel_image_path=args.front_panel_image,
         )
     ):
         if args.frame_format == "png":
@@ -214,6 +216,7 @@ def generate_video(args: argparse.Namespace) -> Path:
         plate_text_color=args.plate_text_color,
         include_background=include_background,
         include_vehicle=include_vehicle,
+        front_panel_image_path=args.front_panel_image,
     ):
         writer.write(rendered)
         frame_count += 1
@@ -276,8 +279,6 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Vehicle speed in meters per second (10 km/h typical city speed).")
     parser.add_argument("--initial-distance-m", type=float, default=30.0,
                         help="Initial vehicle distance from camera in meters.")
-    parser.add_argument("--duration-s", type=float, default=2.0,
-                        help="Video duration in seconds.")
     parser.add_argument("--fps", type=float, default=None,
                         help="Output video FPS. If omitted, the camera config FPS max value is used.")
     parser.add_argument("--shutter-speed-s", type=float, default=None,
@@ -305,11 +306,13 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Plate background B,G,R triple.")
     parser.add_argument("--plate-text-color", type=_parse_color, default=(0, 0, 0),
                         help="Plate text B,G,R triple.")
+    parser.add_argument("--front-panel-image", default=None,
+                        help="Path to a static vehicle front-panel image to warp onto the projected vehicle front panel using the camera geometry.")
     parser.add_argument("--plate-only", action="store_true",
                         help="Render only the projected license plate on a flat background; road and vehicle are excluded.")
     parser.add_argument("--include-background", action=argparse.BooleanOptionalAction, default=False,
                         help="Include the road background in the rendered frame.")
-    parser.add_argument("--include-vehicle", action=argparse.BooleanOptionalAction, default=False,
+    parser.add_argument("--include-vehicle", action=argparse.BooleanOptionalAction, default=True,
                         help="Include the rendered vehicle silhouette in the scene.")
 
     parser.add_argument("--output", default=str(ROOT / "output" / "anpr_sequence.mp4"),
