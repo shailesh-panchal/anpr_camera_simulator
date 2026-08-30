@@ -13,6 +13,10 @@ from anpr_simulator.geometry.plate_projection import (
     project_plate,
     project_vehicle_plate
 )
+from anpr_simulator.geometry.projection import (
+    Point3D,
+    project_point,
+)
 from anpr_simulator.geometry.camera_pose import (
     CameraPose,
 )
@@ -61,6 +65,27 @@ def test_project_plate():
     assert result.height_pixels == pytest.approx(
         expected_height
     )
+
+def test_project_point_uses_image_y_downward_axis():
+
+    intrinsics = CameraIntrinsics(
+        fx=973.4,
+        fy=983.4,
+        cx=968.0,
+        cy=550.0,
+    )
+
+    result = project_point(
+        Point3D(
+            x=0.0,
+            y=1.0,
+            z=10.0,
+        ),
+        intrinsics,
+    )
+
+    assert result.v < intrinsics.cy
+
 
 def test_plate_size_decreases_with_distance():
 

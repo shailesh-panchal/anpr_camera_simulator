@@ -68,6 +68,7 @@ def create_test_generator() -> FrameGenerator:
         intrinsics=intrinsics,
     )
 
+import numpy as np
 import pytest
 
 from anpr_simulator.geometry.camera_intrinsics import (
@@ -181,6 +182,26 @@ def test_frame_generator_timestamps():
     assert frames[1].timestamp_s == pytest.approx(0.1)
     assert frames[2].timestamp_s == pytest.approx(0.2)
     assert frames[9].timestamp_s == pytest.approx(0.9)
+
+
+def test_frame_generator_rendered_frames_produce_images():
+
+    generator = create_test_generator()
+
+    rendered_frames = list(
+        generator.generate_rendered(
+            plate_number="KA01AB1234",
+            frame_size=(640, 360),
+            vehicle_size=(180, 90),
+        )
+    )
+
+    assert len(rendered_frames) == 10
+
+    for frame in rendered_frames:
+        assert frame.shape == (360, 640, 3)
+        assert frame.dtype == np.uint8
+
 
 def test_vehicle_moves_between_frames():
 

@@ -25,10 +25,22 @@ class Point2D:
 
     u: horizontal pixel coordinate
     v: vertical pixel coordinate
+
+    Compatibility aliases:
+        x == u
+        y == v
     """
 
     u: float
     v: float
+
+    @property
+    def x(self) -> float:
+        return self.u
+
+    @property
+    def y(self) -> float:
+        return self.v
 
 
 def project_point(
@@ -71,10 +83,10 @@ def project_point(
     )
 
     v = (
-        intrinsics.fy
+        intrinsics.cy
+        - intrinsics.fy
         * point.y
         / point.z
-        + intrinsics.cy
     )
 
     return Point2D(
