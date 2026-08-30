@@ -72,12 +72,22 @@ def project_vehicle_plate(
     plate_dimensions: LicensePlateDimensions,
     camera_pose: CameraPose,
     intrinsics: CameraIntrinsics,
+    vehicle_length_m: float = 0.0,
 ) -> ProjectedPlate:
+    """
+    Project the vehicle's license plate onto the camera image.
+    
+    The plate is positioned at the BACK of the vehicle (vehicle_z + vehicle_length/2)
+    to ensure proper alignment with the rear panel visible from behind.
+    """
 
+    # Calculate the Z position of the vehicle's back panel
+    plate_z_m = vehicle_state.z_m + (vehicle_length_m / 2.0) if vehicle_length_m > 0 else vehicle_state.z_m
+    
     corners = license_plate_corners(
         center_x_m=vehicle_state.x_m,
         center_y_m=vehicle_state.y_m,
-        distance_z_m=vehicle_state.z_m,
+        distance_z_m=plate_z_m,
         dimensions=plate_dimensions,
     )
 

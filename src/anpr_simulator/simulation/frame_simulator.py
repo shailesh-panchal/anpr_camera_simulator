@@ -46,6 +46,7 @@ def simulate_frame(
         plate_dimensions=plate_dimensions,
         camera_pose=camera_pose,
         intrinsics=intrinsics,
+        vehicle_length_m=vehicle_dimensions.length_m,
     )
 
     return SimulationFrame(

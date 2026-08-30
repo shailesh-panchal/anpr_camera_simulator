@@ -120,7 +120,7 @@ def build_generator(args: argparse.Namespace) -> FrameGenerator:
     trajectory = VehicleTrajectory(
         initial_z_m=args.initial_distance_m,
         speed_mps=args.speed_mps,
-        x_m=0.0,
+        x_m=args.vehicle_offset_x,
         y_m=0.0,
         direction=direction,
     )
@@ -279,6 +279,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Vehicle speed in meters per second (10 km/h typical city speed).")
     parser.add_argument("--initial-distance-m", type=float, default=30.0,
                         help="Initial vehicle distance from camera in meters.")
+    parser.add_argument("--vehicle-offset-x", type=float, default=0.0,
+                        help="Lateral vehicle position offset in meters. Negative = left, positive = right.")
     parser.add_argument("--fps", type=float, default=None,
                         help="Output video FPS. If omitted, the camera config FPS max value is used.")
     parser.add_argument("--shutter-speed-s", type=float, default=None,
