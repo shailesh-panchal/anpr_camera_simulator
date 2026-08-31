@@ -1,0 +1,25 @@
+# Vehicle Specifications Configuration
+
+vehicle:
+  type: "four_wheeler"       # Options: "two_wheeler", "three_wheeler", "four_wheeler"
+  dimensions:
+    length_meters: 4.5
+    width_meters: 1.8
+    height_meters: 1.5
+
+number_plates:
+  front:
+    is_present: true
+    mount_height_meters: 0.45    # Height from the ground
+    dimensions:
+      width_meters: 0.52
+      height_meters: 0.11
+    
+
+  back:
+    is_present: true
+    mount_height_meters: 0.65    # Height from the ground
+    dimensions:
+      width_meters: 0.34
+      height_meters: 0.20        # Often a taller square format for rear plates
+    

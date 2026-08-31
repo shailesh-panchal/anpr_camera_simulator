@@ -283,9 +283,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Lateral vehicle position offset in meters. Negative = left, positive = right.")
     parser.add_argument("--fps", type=float, default=None,
                         help="Output video FPS. If omitted, the camera config FPS max value is used.")
+    '''
     parser.add_argument("--shutter-speed-s", type=float, default=None,
                         help="Exposure shutter speed in seconds. If omitted, the camera config min shutter value is used.")
-
     parser.add_argument("--fx", type=float, default=None,
                         help="Camera focal length in pixels along X. If omitted, it is derived from the camera config.")
     parser.add_argument("--fy", type=float, default=None,
@@ -294,7 +294,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Image center x coordinate in pixels. If omitted, it is derived from the sensor size.")
     parser.add_argument("--cy", type=float, default=None,
                         help="Image center y coordinate in pixels. If omitted, it is derived from the sensor size.")
-
+    '''
     parser.add_argument("--vehicle-render-width-px", type=int, default=260,
                         help="Rendered vehicle rectangle width in pixels.")
     parser.add_argument("--vehicle-render-height-px", type=int, default=110,
